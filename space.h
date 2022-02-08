@@ -9,7 +9,7 @@ struct Obstacle{
         int r;
 };
 
-class Node{
+struct Node{
     public:
         int x;
         int y;
@@ -27,8 +27,8 @@ class Space{
         bool checkCollision(Node node);
         Node start;
         Node goal;
-        Node samplePoint();
-        void addNode();
+        Node addNode();
+        Node getNearestNode(Node node);
         void addConnection(Node a, Node b);
 
         double delta;
