@@ -5,6 +5,8 @@
 
 #include <cmath>
 #include <matplot/matplot.h>
+#include <thread>
+
 
 
 using namespace matplot;
@@ -14,21 +16,61 @@ int main(){
 
     Space space;
     space.init();
+    space.addNode();
+    space.addNode();
+    space.solve();
     bool found=false;
+
+    vector<double> xo;
+    vector<double> yo;
+    for(Obstacle obstacle: space.obstacles ){
+        xo.push_back((double) obstacle.x);
+        yo.push_back((double) obstacle.y);
+
+    }
+    auto o = scatter(xo, yo);
+
+
     while (!found)
     {   
         found = space.solve();
-        for(Obstacle obstacle: space.obstacles ){
-            vector<double> x((double) obstacle.x);
-            vector<double> y((double) obstacle.y);
 
-            scatter(x, y);
-            show();
 
-        }
-
+        int c=0;
         int a;
+
+        // hold(on);
+        scatter(xo, yo);
+
+        vector<double> xx;
+        vector<double> yy;
+        vector<vector<double>> lx;
+        vector<vector<double>> ly;
+
+        for(Node node: space.nodes ){
+            std::cout<<c<<" "<<node.x<<" "<<node.y<<std::endl;
+            xx.push_back((double) node.x);
+            yy.push_back((double) node.y);
+
+            lx[c].push_back((double) node.x);
+            ly[c].push_back((double) node.y);
+
+            lx[c].push_back((double) node.childNode->x);
+            ly[c].push_back((double) node.childNode->y);
+            c++;
+        }
+                    //plot(lx,ly, "k");
+    plot(vector_2d{{1, 4}, {2, 5}, {3, 6}});
+    show();
+
+        // auto l = scatter(xx, yy);
+        // l->marker_face_color({0.f, .7f, .7f});
+        // hold(off);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
         std::cin>>a;
+
         std::cout<<"Solution found: "<<found;
     }
     

@@ -21,7 +21,7 @@ struct Node{
 class Space{
     public:
         vector<Obstacle> obstacles;
-        vector<Node> Nodes;
+        vector<Node> nodes;
         void init();
         bool solve();
         bool checkCollision(Node node);

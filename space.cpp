@@ -10,7 +10,7 @@ void Space::init(){
     goal.x = 50;
     goal.y = 50;
 
-    for(int i =0; i<5 ;i++){
+    for(int i = 0; i<5 ;i++){
         Obstacle obstacle;
         obstacle.x=(5-i)*10;
         obstacle.y=i*10;
@@ -20,13 +20,13 @@ void Space::init(){
 }
 
 Node Space::addNode(){
-    Node node;
-    node.x = rand() % 50 + 1;
-    node.y = rand() % 50 + 1;
+    Node node = {rand() % 50 + 1, rand() % 50 + 1, nullptr, nullptr};
+    // node.x = 
+    // node.y = rand() % 50 + 1;
 
     Node nearestnode = getNearestNode(node);
     double dist=3;
-    double mag = sqrt(pow(nearestnode.x-node.x,2) + pow(nearestnode.x-node.x,2) );
+    double mag = sqrt(pow(nearestnode.x-node.x,2) + pow(nearestnode.y-node.y,2) );
     node.x = dist*(node.x - nearestnode.x)/sqrt(mag); 
     node.y = dist*(node.y - nearestnode.y)/sqrt(mag); 
 
@@ -39,7 +39,7 @@ Node Space::addNode(){
 
 bool Space::checkCollision(Node node){
     for(Obstacle obstacle : this->obstacles){
-        if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.x-node.x,2) ) < obstacle.r ){
+        if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) ) < obstacle.r ){
             return true;
         }
     }
@@ -53,7 +53,7 @@ void Space::addConnection(Node a, Node b){
 Node Space::getNearestNode(Node node){
     Node nearestnode;
     float min_dist=99999;
-    for(Node n: Nodes){
+    for(Node n: this->nodes){
         float dist = sqrt(pow(n.x-node.x,2) + pow(n.x-node.x,2) );
         if(dist < min_dist){
             nearestnode = n;
@@ -66,10 +66,10 @@ Node Space::getNearestNode(Node node){
 bool Space::solve(){
     Node node = addNode();
     Node nearest_node = getNearestNode(node);
-
     addConnection(nearest_node, node);
+    nodes.push_back(node);
 
-    if(sqrt(pow(this->goal.x-node.x,2) + pow(this->goal.x-node.x,2) ) < 5 ){
+    if(sqrt(pow(this->goal.x-node.x,2) + pow(this->goal.y-node.y,2) ) < 5 ){
         return true;
     }
     return false;
