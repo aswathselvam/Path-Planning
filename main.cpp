@@ -49,13 +49,21 @@ class Plot{
         }
 
         void drawNode(std::vector<boost::tuple<double, double>>& v){
-            gp << "plot '-' using 1:2 with points pt 7\n";
+            gp << "plot '-' using 1:2 with points pt 7";
             gp.send1d(v);
         }
 
         void drawConnection(std::vector<boost::tuple<double, double, double, double>>& v){
-            gp << "plot '-' using 1:2:3:4 with vector notitle\n";
+            gp << "plot '-' using 1:2:3:4 with vector notitle";
             gp.send1d(v);
+        }
+
+        void drawEverything(std::vector<boost::tuple<double, double>>& v, 
+                            std::vector<boost::tuple<double, double, double, double>>& conn
+        ){
+            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle";
+            gp.send1d(v);
+            gp.send1d(conn);
         }
 
         void drawObstacle(std::vector<boost::tuple<double, double, double>>& v){
@@ -97,42 +105,43 @@ int main(){
     space.addNode();
     space.addNode();
 
-    // space.solve();
-    // bool found=false;
-    // Plot plot;
-    // plot.setTitle("RRT").xlabel("X").ylabel("Y");
+    space.solve();
+    bool found=false;
+    Plot plot;
+    plot.setTitle("RRT").xlabel("X").ylabel("Y");
 
-    // vector<boost::tuple<double, double, double, double>> connectionVector;
-    // vector<boost::tuple<double, double, double>> obstacleVector;
-    // vector<boost::tuple<double, double>> nodeVector;
+    vector<boost::tuple<double, double, double, double>> connectionVector;
+    vector<boost::tuple<double, double, double>> obstacleVector;
+    vector<boost::tuple<double, double>> nodeVector;
     
-    // vector<double> xo;
-    // vector<double> yo;
-    // for(Obstacle obstacle: space.obstacles ){
-    //     obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
-    // }
-    // plot.drawObstacle(obstacleVector);
+    vector<double> xo;
+    vector<double> yo;
+    for(Obstacle obstacle: space.obstacles ){
+        obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
+    }
+    plot.drawObstacle(obstacleVector);
 
-    // while (!found)
-    // {   
-    //     found = space.solve();
+    while (!found)
+    {   
+        found = space.solve();
 
-    //     int c=0;
-    //     int a;
+        int c=0;
+        int a;
 
-    //     nodeVector.clear();
-    //     connectionVector.clear();
-    //     Node& currentNode = space.start;
+        nodeVector.clear();
+        connectionVector.clear();
+        Node& currentNode = space.start;
         
-    //     drawConnections(connectionVector, nodeVector, currentNode);
+        drawConnections(connectionVector, nodeVector, currentNode);
 
-    //     // plot.drawNode(nodeVector);
-    //     // plot.drawConnection(connectionVector);
+        // plot.drawNode(nodeVector);
+        // plot.drawConnection(connectionVector);
+        plot.drawEverything(nodeVector, connectionVector);
 
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    //     std::cout<<"Solution found: "<<found;
-    // }
+        std::cout<<"Solution found: "<<found;
+    }
     
     return 0;
 } 
