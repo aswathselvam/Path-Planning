@@ -27,9 +27,8 @@ class Space{
         bool checkCollision(Node& node);
         Node start;
         Node goal;
-        Node currentNode;
         Node& addNode();
-        Node& getNearestNode(Node& node);
+        Node& getNearestNode(double& min_dist, Node& currentNode, Node& node);
         void addConnection(Node& a, Node& b);
 
         double delta;

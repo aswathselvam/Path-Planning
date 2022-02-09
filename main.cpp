@@ -11,6 +11,7 @@
 #include <string_view>
 
 using std::vector;
+typedef vector<boost::tuple<double, double, double, double>> connection;
 
 class Plot{
     public:
@@ -77,59 +78,61 @@ class Plot{
 
 };
 
+void drawConnections(connection& connectionVector,vector<boost::tuple<double, double>>& nodeVector,Node& node){
+    nodeVector.push_back(boost::make_tuple(node.x, node.y));
+    for(Node* childnode : node.childNodes){
+        // Add to connection
+        connectionVector.push_back(boost::make_tuple(node.x, node.y, childnode->x, childnode->y));
+        drawConnections(connectionVector, nodeVector, *childnode);
+    }
+    
+}
+
 int main(){
 
     Space space;
     space.init();
     space.addNode();
     space.addNode();
-    space.solve();
-    bool found=false;
-    Plot plot;
-    plot.setTitle("RRT").xlabel("X").ylabel("Y");
+    space.addNode();
+    space.addNode();
 
-    vector<boost::tuple<double, double, double, double>> connectionVector;
-    vector<boost::tuple<double, double, double>> obstacleVector;
-    vector<boost::tuple<double, double>> nodeVector;
+    // space.solve();
+    // bool found=false;
+    // Plot plot;
+    // plot.setTitle("RRT").xlabel("X").ylabel("Y");
+
+    // vector<boost::tuple<double, double, double, double>> connectionVector;
+    // vector<boost::tuple<double, double, double>> obstacleVector;
+    // vector<boost::tuple<double, double>> nodeVector;
     
-    vector<double> xo;
-    vector<double> yo;
-    for(Obstacle obstacle: space.obstacles ){
-        obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
-    }
-    plot.drawObstacle(obstacleVector);
+    // vector<double> xo;
+    // vector<double> yo;
+    // for(Obstacle obstacle: space.obstacles ){
+    //     obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
+    // }
+    // plot.drawObstacle(obstacleVector);
 
-    while (!found)
-    {   
-        found = space.solve();
+    // while (!found)
+    // {   
+    //     found = space.solve();
 
-        int c=0;
-        int a;
+    //     int c=0;
+    //     int a;
 
-        nodeVector.clear();
-        connectionVector.clear();
-        for(Node node: space.nodes ){
-            Node node2;
-            // node.childNode = &node2;
-            // std::cout<<c<<" x: "<<node.x<<" y: "<<node.y
-            // <<" childnode: "<<node.childNode<<std::endl;
+    //     nodeVector.clear();
+    //     connectionVector.clear();
+    //     Node& currentNode = space.start;
+        
+    //     drawConnections(connectionVector, nodeVector, currentNode);
 
-            // Add Node Visualization
-            nodeVector.push_back(boost::make_tuple(node.x, node.y));
+    //     // plot.drawNode(nodeVector);
+    //     // plot.drawConnection(connectionVector);
 
-            // Add Connection Visualization
-            if(node.childNodes!=nullptr){
-                connectionVector.push_back(boost::make_tuple(node.x, node.y, node.childNodes->x, node.childNodes->y));
-            }
-        }
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-        // plot.drawNode(nodeVector);
-        // plot.drawConnection(connectionVector);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-        std::cout<<"Solution found: "<<found;
-    }
+    //     std::cout<<"Solution found: "<<found;
+    // }
     
     return 0;
 } 
