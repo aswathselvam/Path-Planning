@@ -20,29 +20,29 @@ void Space::init(){
     }
 }
 
-Node Space::addNode(){
-    Node node = {rand() % 50 + 1, rand() % 50 + 1, nullptr, nullptr};
-    // node.x = 
-    // node.y = rand() % 50 + 1;
+Node& Space::addNode(){
+    Node* node = new Node{rand() % 50 + 1, rand() % 50 + 1};
 
-    Node& nearestnode = getNearestNode(node);
-    addConnection(nearestnode, node);
-    std::cout<<"Nearest node.childnode: "<<nearestnode.childNode<<std::endl;
+    Node& nearestnode = getNearestNode(*node);
+    addConnection(nearestnode, *node);
+    std::cout<<"Nearest node.childnode: "<<nearestnode.childNodes[0]<<std::endl;
 
     double dist=3;
-    double mag = sqrt(pow(nearestnode.x-node.x,2) + pow(nearestnode.y-node.y,2) );
-    node.x = dist*(node.x - nearestnode.x)/sqrt(mag); 
-    node.y = dist*(node.y - nearestnode.y)/sqrt(mag); 
+    double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
+    node->x = dist*(node->x - nearestnode.x)/sqrt(mag); 
+    node->y = dist*(node->y - nearestnode.y)/sqrt(mag); 
 
-    if(checkCollision(node)){
+    if(checkCollision(*node)){
+        delete node;
         return addNode();
-    }
+    }else{
 
-    return node;
+    return *node;
+    }
 }
 
-bool Space::checkCollision(Node node){
-    for(Obstacle obstacle : this->obstacles){
+bool Space::checkCollision(Node& node){
+    for(Obstacle& obstacle : this->obstacles){
         if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) ) < obstacle.r ){
             return true;
         }
@@ -51,13 +51,13 @@ bool Space::checkCollision(Node node){
 }
 
 void Space::addConnection(Node& a, Node& b){
-    a.childNode = &b;
+    a.childNodes.push_back(&b);
 }
 
-Node& Space::getNearestNode(Node node){
-    Node* nearestnode;
+Node& Space::getNearestNode(Node& node){
     float min_dist=99999;
-    for(Node n: this->nodes){
+    Node* nearestnode;
+    for(Node& n: this->nodes){
         float dist = sqrt(pow(n.x-node.x,2) + pow(n.x-node.x,2) );
         if(dist < min_dist){
             nearestnode = &n;
@@ -68,8 +68,9 @@ Node& Space::getNearestNode(Node node){
 }
 
 bool Space::solve(){
-    Node node = addNode();
-    nodes.push_back(node);
+    Node& node = addNode();
+
+    std::cout<<"SOLVE() node.childnode: "<<node.childNodes[0]<<std::endl;
 
     if(sqrt(pow(this->goal.x-node.x,2) + pow(this->goal.y-node.y,2) ) < 5 ){
         return true;

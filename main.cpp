@@ -118,13 +118,13 @@ int main(){
             nodeVector.push_back(boost::make_tuple(node.x, node.y));
 
             // Add Connection Visualization
-            if(node.childNode!=nullptr){
-                connectionVector.push_back(boost::make_tuple(node.x, node.y, node.childNode->x, node.childNode->y));
+            if(node.childNodes!=nullptr){
+                connectionVector.push_back(boost::make_tuple(node.x, node.y, node.childNodes->x, node.childNodes->y));
             }
         }
 
-        plot.drawNode(nodeVector);
-        plot.drawConnection(connectionVector);
+        // plot.drawNode(nodeVector);
+        // plot.drawConnection(connectionVector);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 

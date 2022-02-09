@@ -14,7 +14,7 @@ struct Node{
         int x;
         int y;
         Node* parentNode;
-        Node* childNode;
+        vector<Node*> childNodes;
 
 };
 
@@ -24,11 +24,12 @@ class Space{
         vector<Node> nodes;
         void init();
         bool solve();
-        bool checkCollision(Node node);
+        bool checkCollision(Node& node);
         Node start;
         Node goal;
-        Node addNode();
-        Node& getNearestNode(Node node);
+        Node currentNode;
+        Node& addNode();
+        Node& getNearestNode(Node& node);
         void addConnection(Node& a, Node& b);
 
         double delta;
