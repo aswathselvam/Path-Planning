@@ -1,6 +1,7 @@
 #include "space.h"
 #include <stdlib.h>    
 #include <cmath>
+#include <iostream>
 
 void Space::init(){
     srand (1);
@@ -24,7 +25,10 @@ Node Space::addNode(){
     // node.x = 
     // node.y = rand() % 50 + 1;
 
-    Node nearestnode = getNearestNode(node);
+    Node& nearestnode = getNearestNode(node);
+    addConnection(nearestnode, node);
+    std::cout<<"Nearest node.childnode: "<<nearestnode.childNode<<std::endl;
+
     double dist=3;
     double mag = sqrt(pow(nearestnode.x-node.x,2) + pow(nearestnode.y-node.y,2) );
     node.x = dist*(node.x - nearestnode.x)/sqrt(mag); 
@@ -46,27 +50,25 @@ bool Space::checkCollision(Node node){
     return false;
 }
 
-void Space::addConnection(Node a, Node b){
+void Space::addConnection(Node& a, Node& b){
     a.childNode = &b;
 }
 
-Node Space::getNearestNode(Node node){
-    Node nearestnode;
+Node& Space::getNearestNode(Node node){
+    Node* nearestnode;
     float min_dist=99999;
     for(Node n: this->nodes){
         float dist = sqrt(pow(n.x-node.x,2) + pow(n.x-node.x,2) );
         if(dist < min_dist){
-            nearestnode = n;
+            nearestnode = &n;
             min_dist = dist;
         }
     }
-    return nearestnode;
+    return *nearestnode;
 }
 
 bool Space::solve(){
     Node node = addNode();
-    Node nearest_node = getNearestNode(node);
-    addConnection(nearest_node, node);
     nodes.push_back(node);
 
     if(sqrt(pow(this->goal.x-node.x,2) + pow(this->goal.y-node.y,2) ) < 5 ){

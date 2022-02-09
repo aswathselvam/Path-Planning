@@ -28,8 +28,8 @@ class Space{
         Node start;
         Node goal;
         Node addNode();
-        Node getNearestNode(Node node);
-        void addConnection(Node a, Node b);
+        Node& getNearestNode(Node node);
+        void addConnection(Node& a, Node& b);
 
         double delta;
 
