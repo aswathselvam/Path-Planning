@@ -28,8 +28,8 @@ Node& Space::addNode(){
     Node& nearestnode = getNearestNode(distt,this->start,*node);
     addConnection(nearestnode, *node);
 
-    double dist=3;
     double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
+    double dist= mag > 3 ? 3 : mag;
     node->x = nearestnode.x + dist*(node->x - nearestnode.x)/mag; 
     node->y = nearestnode.y + dist*(node->y - nearestnode.y)/mag;
 
