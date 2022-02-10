@@ -58,11 +58,16 @@ class Plot{
             gp.send1d(v);
         }
 
-        void drawGraph(std::vector<boost::tuple<double, double>>& v, 
+        void drawGraph(std::vector<boost::tuple<double, double>> start,
+                            std::vector<boost::tuple<double, double>> goal,
+                            std::vector<boost::tuple<double, double>>& v, 
                             std::vector<boost::tuple<double, double, double, double>>& conn,
                             std::vector<boost::tuple<double, double, double>>& obs
         ){
-            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle, '-' using 1:2:3 with circles notitle\n";
+            gp << "plot '-' using 1:2 with points pt 35 ps 3 title \"Start\", '-' using 1:2 with points pt 35 ps 3 title \"goal\", '-' using 1:2 with points pt 7 title \"Nodes\", '-' using 1:2:3:4 with vector title \"Connections\", '-' using 1:2:3 with circles fillstyle pattern 4 transparent lc rgb '#990000' title \"Obstacles\"\n";
+
+            gp.send1d(start);
+            gp.send1d(goal);
             gp.send1d(v);
             gp.send1d(conn);
             gp.send1d(obs);
@@ -107,17 +112,20 @@ int main(){
     space.init();
     bool found=false;
     Plot plot;
-    plot.setTitle("RRT").xlabel("X").ylabel("Y");
+    // plot.setTitle("RRT").xlabel("X").ylabel("Y");
 
     vector<boost::tuple<double, double, double, double>> connectionVector;
     vector<boost::tuple<double, double, double>> obstacleVector;
     vector<boost::tuple<double, double>> nodeVector;
+    vector<boost::tuple<double, double>> startVector;
+    vector<boost::tuple<double, double>> goalVector;
     
-    vector<double> xo;
-    vector<double> yo;
     for(Obstacle obstacle: space.obstacles ){
         obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
     }
+
+    startVector.push_back(boost::make_tuple(space.start.x, space.start.y));
+    goalVector.push_back(boost::make_tuple(space.goal.x, space.goal.y));
 
     while (!found)
     {   
@@ -131,9 +139,7 @@ int main(){
         Node& currentNode = space.start;
         
         formGraph(connectionVector, nodeVector, currentNode);
-
-        //plot.drawObstacle(obstacleVector);
-        plot.drawGraph(nodeVector, connectionVector, obstacleVector);
+        plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
