@@ -12,12 +12,14 @@
 
 using std::vector;
 
+
 bool DIM3 = true;
 // #ifdef DIM3{
     // typedef vector<boost::tuple<double, double, double, double, double, double>> connectionT;
     // typedef vector<boost::tuple<double, double, double>> nodeT;
     // typedef vector<boost::tuple<double, double, double, double>> obstacleT;
 // }else{
+    typedef Node NodeDim;
     typedef vector<boost::tuple<double, double, double, double>> connectionT;
     typedef vector<boost::tuple<double, double>> nodeT;
     typedef vector<boost::tuple<double, double, double>> obstacleT;
@@ -139,9 +141,13 @@ void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
     
 }
 
+
+
 int main(){
 
-    Space<Node> space;
+    Space<NodeDim> space;
+    NodeDim& currentNode = space.start;
+
     space.init();
     bool found=false;
     Plot plot;
@@ -169,7 +175,6 @@ int main(){
 
         nodeVector.clear();
         connectionVector.clear();
-        Node& currentNode = space.start;
         
         formGraph(connectionVector, nodeVector, currentNode);
         plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);

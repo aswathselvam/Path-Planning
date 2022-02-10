@@ -44,6 +44,9 @@ class Space{
         double L2(Node3D&, Node3D&);
         double L2(Obstacle&, Node&);
         double L2(Obstacle3D&, Node3D&);
+        
+        void directionComponent(Node&, Node&);
+        void directionComponent(Node3D&, Node3D&);
 
         vector<Obstacle> obstacles;
         vector<NodeDim> nodes;

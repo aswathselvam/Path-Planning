@@ -30,10 +30,7 @@ NodeDim& Space<NodeDim>::addNode(){
     double distt=std::numeric_limits<double>::max();
     NodeDim& nearestnode = getNearestNode(distt,this->start,*node);
 
-    double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
-    double dist= mag > 3 ? 3 : mag;
-    node->x = nearestnode.x + dist*(node->x - nearestnode.x)/mag; 
-    node->y = nearestnode.y + dist*(node->y - nearestnode.y)/mag;
+    directionComponent(nearestnode, *node);
 
     if(checkCollision(*node)){
         delete node;
@@ -46,6 +43,19 @@ NodeDim& Space<NodeDim>::addNode(){
 template<class NodeDim>
 double Space<NodeDim>::L2(Obstacle& obstacle, Node& node){
     return sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) );
+}
+
+template<class NodeDim>
+double Space<NodeDim>::L2(Node& n1, Node& n2){
+    return sqrt(pow(n1.x-n2.x,2) + pow(n1.y-n2.y,2) );
+}
+
+template<class NodeDim>
+void Space<NodeDim>::directionComponent(Node& n1to, Node& n2){
+    double mag = L2(n1to, n2);
+    double dist= mag > 3 ? 3 : mag;
+    n2.x = n1to.x + dist*(n2.x - n1to.x)/mag; 
+    n2.y = n1to.y + dist*(n2.y - n1to.y)/mag;
 }
 
 template<class NodeDim>
