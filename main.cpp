@@ -59,11 +59,13 @@ class Plot{
         }
 
         void drawGraph(std::vector<boost::tuple<double, double>>& v, 
-                            std::vector<boost::tuple<double, double, double, double>>& conn
+                            std::vector<boost::tuple<double, double, double, double>>& conn,
+                            std::vector<boost::tuple<double, double, double>>& obs
         ){
-            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle\n";
+            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle, '-' using 1:2:3 with circles notitle\n";
             gp.send1d(v);
             gp.send1d(conn);
+            gp.send1d(obs);
         }
 
         void drawObstacle(std::vector<boost::tuple<double, double, double>>& v){
@@ -130,8 +132,8 @@ int main(){
         
         formGraph(connectionVector, nodeVector, currentNode);
 
-        plot.drawObstacle(obstacleVector);
-        plot.drawGraph(nodeVector, connectionVector);
+        //plot.drawObstacle(obstacleVector);
+        plot.drawGraph(nodeVector, connectionVector, obstacleVector);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 

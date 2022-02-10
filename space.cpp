@@ -26,24 +26,23 @@ Node& Space::addNode(){
 
     double distt=std::numeric_limits<double>::max();
     Node& nearestnode = getNearestNode(distt,this->start,*node);
-    addConnection(nearestnode, *node);
 
     double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
     double dist= mag > 3 ? 3 : mag;
     node->x = nearestnode.x + dist*(node->x - nearestnode.x)/mag; 
     node->y = nearestnode.y + dist*(node->y - nearestnode.y)/mag;
 
-    // if(checkCollision(*node)){
-    //     delete node;
-    //     return addNode();
-    // }
+    if(checkCollision(*node)){
+        delete node;
+        return addNode();
+    }
+    addConnection(nearestnode, *node);
     return *node;
-
 }
 
 bool Space::checkCollision(Node& node){
     for(Obstacle& obstacle : this->obstacles){
-        if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) ) < obstacle.r ){
+        if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) ) < 2*obstacle.r){
             return true;
         }
     }
