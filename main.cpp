@@ -49,19 +49,19 @@ class Plot{
         }
 
         void drawNode(std::vector<boost::tuple<double, double>>& v){
-            gp << "plot '-' using 1:2 with points pt 7";
+            gp << "plot '-' using 1:2 with points pt 7\n";
             gp.send1d(v);
         }
 
         void drawConnection(std::vector<boost::tuple<double, double, double, double>>& v){
-            gp << "plot '-' using 1:2:3:4 with vector notitle";
+            gp << "plot '-' using 1:2:3:4 with vector notitle\n";
             gp.send1d(v);
         }
 
         void drawEverything(std::vector<boost::tuple<double, double>>& v, 
                             std::vector<boost::tuple<double, double, double, double>>& conn
         ){
-            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle";
+            gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle\n";
             gp.send1d(v);
             gp.send1d(conn);
         }
@@ -88,9 +88,14 @@ class Plot{
 
 void drawConnections(connection& connectionVector,vector<boost::tuple<double, double>>& nodeVector,Node& node){
     nodeVector.push_back(boost::make_tuple(node.x, node.y));
+    if(!node.childNodes.size()>0){
+        return;
+    }
     for(Node* childnode : node.childNodes){
         // Add to connection
-        connectionVector.push_back(boost::make_tuple(node.x, node.y, childnode->x, childnode->y));
+        connectionVector.push_back(boost::make_tuple(node.x, node.y, childnode->x-node.x, childnode->y-node.y));
+        std::cout<<"\nPArent x: "<<node.x<<" Parent y: "<<node.y<<std::endl<<std::endl;
+        std::cout<<"\nChild x: "<<childnode->x<<" Child y: "<<childnode->y<<std::endl<<std::endl;
         drawConnections(connectionVector, nodeVector, *childnode);
     }
     
@@ -100,12 +105,6 @@ int main(){
 
     Space space;
     space.init();
-    space.addNode();
-    space.addNode();
-    space.addNode();
-    space.addNode();
-
-    space.solve();
     bool found=false;
     Plot plot;
     plot.setTitle("RRT").xlabel("X").ylabel("Y");
@@ -138,7 +137,7 @@ int main(){
         // plot.drawConnection(connectionVector);
         plot.drawEverything(nodeVector, connectionVector);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         std::cout<<"Solution found: "<<found;
     }

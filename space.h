@@ -4,15 +4,15 @@ using std::vector;
 
 struct Obstacle{
     public:
-        int x;
-        int y;
-        int r;
+        double x;
+        double y;
+        double r;
 };
 
 struct Node{
     public:
-        int x;
-        int y;
+        double x;
+        double y;
         Node* parentNode;
         vector<Node*> childNodes;
 

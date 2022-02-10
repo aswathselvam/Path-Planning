@@ -21,7 +21,9 @@ void Space::init(){
 }
 
 Node& Space::addNode(){
-    Node* node = new Node{rand() % 50 + 1, rand() % 50 + 1};
+    Node* node = new Node{rand() % 100 + 1, rand() % 100 + 1};
+        std::cout<<"RAND Parent node x: "<<node->x<<" Parent node y: "<<node->y<<std::endl; 
+
     double distt=9999;
     Node& nearestnode = getNearestNode(distt,this->start,*node);
     addConnection(nearestnode, *node);
@@ -29,9 +31,11 @@ Node& Space::addNode(){
 
     double dist=3;
     double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
-    node->x = dist*(node->x - nearestnode.x)/sqrt(mag); 
-    node->y = dist*(node->y - nearestnode.y)/sqrt(mag); 
-
+    node->x = nearestnode.x + dist*(node->x - nearestnode.x)/mag; 
+    node->y = nearestnode.y + dist*(node->y - nearestnode.y)/mag;
+    std::cout<<"adn Parent node x: "<<nearestnode.x<<" Parent node y: "<<nearestnode.y<<std::endl; 
+    std::cout<<"adn Child node x: "<<node->x<<" Child node y: "<<node->y<<std::endl;
+    
     // if(checkCollision(*node)){
     //     delete node;
     //     return addNode();
