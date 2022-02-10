@@ -36,7 +36,7 @@ struct Node3D{
 
 };
 
-template <class NodeDim>
+template <class NodeDim, class ObstacleDim>
 class Space{
     public:
         // Space();
@@ -47,8 +47,7 @@ class Space{
         
         void directionComponent(Node&, Node&);
         void directionComponent(Node3D&, Node3D&);
-
-        vector<Obstacle> obstacles;
+        vector<ObstacleDim> obstacles;
         vector<NodeDim> nodes;
         void init();
         bool solve();

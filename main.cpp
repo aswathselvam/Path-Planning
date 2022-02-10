@@ -20,6 +20,7 @@ bool DIM3 = true;
     // typedef vector<boost::tuple<double, double, double, double>> obstacleT;
 // }else{
     typedef Node NodeDim;
+    typedef Obstacle ObstacleDim;
     typedef vector<boost::tuple<double, double, double, double>> connectionT;
     typedef vector<boost::tuple<double, double>> nodeT;
     typedef vector<boost::tuple<double, double, double>> obstacleT;
@@ -145,7 +146,7 @@ void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
 
 int main(){
 
-    Space<NodeDim> space;
+    Space<NodeDim, ObstacleDim> space;
     NodeDim& currentNode = space.start;
 
     space.init();

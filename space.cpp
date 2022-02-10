@@ -3,10 +3,10 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-template class Space<Node>;
+template class Space<Node, Obstacle>;
 
-template <class NodeDim>
-void Space<NodeDim>::init(){
+template <class NodeDim, class ObstacleDim>
+void Space<NodeDim, ObstacleDim>::init(){
     srand (1);
     start.x = 10;
     start.y = 10;
@@ -15,7 +15,7 @@ void Space<NodeDim>::init(){
     goal.y = 50;
 
     for(int i = 0; i<5 ;i++){
-        Obstacle obstacle;
+        ObstacleDim obstacle;
         obstacle.x=(5-i)*10;
         obstacle.y=i*10;
         obstacle.r=i*1;
@@ -23,8 +23,8 @@ void Space<NodeDim>::init(){
     }
 }
 
-template <class NodeDim>
-NodeDim& Space<NodeDim>::addNode(){
+template <class NodeDim, class ObstacleDim>
+NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
     NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1};
 
     double distt=std::numeric_limits<double>::max();
@@ -40,27 +40,47 @@ NodeDim& Space<NodeDim>::addNode(){
     return *node;
 }
 
-template<class NodeDim>
-double Space<NodeDim>::L2(Obstacle& obstacle, Node& node){
+template <class NodeDim, class ObstacleDim>
+double Space<NodeDim, ObstacleDim>::L2(Obstacle& obstacle, Node& node){
     return sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) );
 }
 
-template<class NodeDim>
-double Space<NodeDim>::L2(Node& n1, Node& n2){
+template <class NodeDim, class ObstacleDim>
+double Space<NodeDim, ObstacleDim>::L2(Obstacle3D& obstacle, Node3D& node){
+    return sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) + pow(obstacle.z-node.z,2) );
+}
+
+template <class NodeDim, class ObstacleDim>
+double Space<NodeDim, ObstacleDim>::L2(Node& n1, Node& n2){
     return sqrt(pow(n1.x-n2.x,2) + pow(n1.y-n2.y,2) );
 }
 
-template<class NodeDim>
-void Space<NodeDim>::directionComponent(Node& n1to, Node& n2){
+template <class NodeDim, class ObstacleDim>
+double Space<NodeDim, ObstacleDim>::L2(Node3D& n1, Node3D& n2){
+    return sqrt(pow(n1.x-n2.x,2) + pow(n1.y-n2.y,2) + pow(n1.z-n2.z,2) );
+}
+
+
+template <class NodeDim, class ObstacleDim>
+void Space<NodeDim, ObstacleDim>::directionComponent(Node& n1to, Node& n2){
     double mag = L2(n1to, n2);
     double dist= mag > 3 ? 3 : mag;
     n2.x = n1to.x + dist*(n2.x - n1to.x)/mag; 
     n2.y = n1to.y + dist*(n2.y - n1to.y)/mag;
 }
 
-template<class NodeDim>
-bool Space<NodeDim>::checkCollision(Node& node){
-    for(Obstacle& obstacle : this->obstacles){
+template <class NodeDim, class ObstacleDim>
+void Space<NodeDim, ObstacleDim>::directionComponent(Node3D& n1to, Node3D& n2){
+    double mag = L2(n1to, n2);
+    double dist= mag > 3 ? 3 : mag;
+    n2.x = n1to.x + dist*(n2.x - n1to.x)/mag; 
+    n2.y = n1to.y + dist*(n2.y - n1to.y)/mag;
+    n2.z = n1to.z + dist*(n2.z - n1to.z)/mag;
+}
+
+template <class NodeDim, class ObstacleDim>
+bool Space<NodeDim, ObstacleDim>::checkCollision(Node& node){
+    for(ObstacleDim& obstacle : this->obstacles){
         if(L2(obstacle, node) < 2*obstacle.r){
             return true;
         }
@@ -68,24 +88,24 @@ bool Space<NodeDim>::checkCollision(Node& node){
     return false;
 }
 
-template<class NodeDim>
-void Space<NodeDim>::addConnection(NodeDim& a, NodeDim& b){
+template <class NodeDim, class ObstacleDim>
+void Space<NodeDim, ObstacleDim>::addConnection(NodeDim& a, NodeDim& b){
     a.childNodes.push_back(&b);
 }
 
-template<class NodeDim>
-NodeDim& Space<NodeDim>::getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node){
-    Node* nearestnode = nullptr;
+template <class NodeDim, class ObstacleDim>
+NodeDim& Space<NodeDim, ObstacleDim>::getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node){
+    NodeDim* nearestnode = nullptr;
     if(&currentNode == &start && currentNode.childNodes.size()<1){
         return currentNode;
     }
-    for(Node* childNode: currentNode.childNodes){
+    for(NodeDim* childNode: currentNode.childNodes){
         float dist = sqrt(pow(childNode->x-node.x,2) + pow(childNode->y-node.y,2) );
         if(dist < min_dist){
             nearestnode = childNode;
             min_dist = dist;
         }
-        Node& nearestnodeCandidate = getNearestNode(min_dist, *childNode, node);
+        NodeDim& nearestnodeCandidate = getNearestNode(min_dist, *childNode, node);
         if(&nearestnodeCandidate!=nullptr){
                 nearestnode = &nearestnodeCandidate;
         }
@@ -94,15 +114,14 @@ NodeDim& Space<NodeDim>::getNearestNode(double& min_dist, NodeDim& currentNode, 
     return *nearestnode;
 }
 
-template<class NodeDim>
-bool Space<NodeDim>::solve(){
+template <class NodeDim, class ObstacleDim>
+bool Space<NodeDim, ObstacleDim>::solve(){
     NodeDim* node = &addNode();
 
-    //std::cout<<"SOLVE() node.childnode: "<<node.childNodes[0]<<std::endl;
     if(node!=nullptr){
-    if(sqrt(pow(this->goal.x-node->x,2) + pow(this->goal.y-node->y,2) ) < 5 ){
-        return true;
-    }
+        if(L2(goal,*node) < 5){
+            return true;
+        }
     }
     return false;
 }
