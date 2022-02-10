@@ -3,8 +3,10 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+template class Space<Node>;
 
-void Space::init(){
+template <class NodeDim>
+void Space<NodeDim>::init(){
     srand (1);
     start.x = 10;
     start.y = 10;
@@ -21,11 +23,12 @@ void Space::init(){
     }
 }
 
-Node& Space::addNode(){
-    Node* node = new Node{rand() % 100 + 1, rand() % 100 + 1};
+template <class NodeDim>
+NodeDim& Space<NodeDim>::addNode(){
+    NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1};
 
     double distt=std::numeric_limits<double>::max();
-    Node& nearestnode = getNearestNode(distt,this->start,*node);
+    NodeDim& nearestnode = getNearestNode(distt,this->start,*node);
 
     double mag = sqrt(pow(nearestnode.x-node->x,2) + pow(nearestnode.y-node->y,2) );
     double dist= mag > 3 ? 3 : mag;
@@ -40,20 +43,28 @@ Node& Space::addNode(){
     return *node;
 }
 
-bool Space::checkCollision(Node& node){
+template<class NodeDim>
+double Space<NodeDim>::L2(Obstacle& obstacle, Node& node){
+    return sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) );
+}
+
+template<class NodeDim>
+bool Space<NodeDim>::checkCollision(Node& node){
     for(Obstacle& obstacle : this->obstacles){
-        if(sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) ) < 2*obstacle.r){
+        if(L2(obstacle, node) < 2*obstacle.r){
             return true;
         }
     }
     return false;
 }
 
-void Space::addConnection(Node& a, Node& b){
+template<class NodeDim>
+void Space<NodeDim>::addConnection(NodeDim& a, NodeDim& b){
     a.childNodes.push_back(&b);
 }
 
-Node& Space::getNearestNode(double& min_dist, Node& currentNode, Node& node){
+template<class NodeDim>
+NodeDim& Space<NodeDim>::getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node){
     Node* nearestnode = nullptr;
     if(&currentNode == &start && currentNode.childNodes.size()<1){
         return currentNode;
@@ -73,8 +84,9 @@ Node& Space::getNearestNode(double& min_dist, Node& currentNode, Node& node){
     return *nearestnode;
 }
 
-bool Space::solve(){
-    Node* node = &addNode();
+template<class NodeDim>
+bool Space<NodeDim>::solve(){
+    NodeDim* node = &addNode();
 
     //std::cout<<"SOLVE() node.childnode: "<<node.childNodes[0]<<std::endl;
     if(node!=nullptr){
