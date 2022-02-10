@@ -11,7 +11,17 @@
 #include <string_view>
 
 using std::vector;
-typedef vector<boost::tuple<double, double, double, double>> connection;
+
+bool DIM3 = true;
+// #ifdef DIM3{
+    typedef vector<boost::tuple<double, double, double, double, double, double>> connectionT;
+    typedef vector<boost::tuple<double, double, double>> nodeT;
+    typedef vector<boost::tuple<double, double, double, double>> obstacleT;
+// }else{
+//     typedef vector<boost::tuple<double, double, double, double>> connectionT;
+//     typedef vector<boost::tuple<double, double>> nodeT;
+//     typedef vector<boost::tuple<double, double, double>> obstacleT;
+// }
 
 class Plot{
     public:
@@ -58,19 +68,42 @@ class Plot{
             gp.send1d(v);
         }
 
-        void drawGraph(std::vector<boost::tuple<double, double>> start,
-                            std::vector<boost::tuple<double, double>> goal,
-                            std::vector<boost::tuple<double, double>>& v, 
-                            std::vector<boost::tuple<double, double, double, double>>& conn,
-                            std::vector<boost::tuple<double, double, double>>& obs
+        void drawGraph(std::vector<boost::tuple<double, double>>& start,
+                            std::vector<boost::tuple<double, double>>& goal,
+                            std::vector<boost::tuple<double, double>>& nodes, 
+                            std::vector<boost::tuple<double, double, double, double>>& connections,
+                            std::vector<boost::tuple<double, double, double>>& obstacles
         ){
-            gp << "plot '-' using 1:2 with points pt 35 ps 3 title \"Start\", '-' using 1:2 with points pt 35 ps 3 title \"goal\", '-' using 1:2 with points pt 7 title \"Nodes\", '-' using 1:2:3:4 with vector title \"Connections\", '-' using 1:2:3 with circles fillstyle pattern 4 transparent lc rgb '#990000' title \"Obstacles\"\n";
+            gp << "plot '-' using 1:2 with points pt 35 ps 3 title \"Start\", \
+            '-' using 1:2 with points pt 35 ps 3 title \"goal\", \
+             '-' using 1:2 with points pt 7 title \"Nodes\", \
+             '-' using 1:2:3:4 with vector title \"Connections\", \
+             '-' using 1:2:3 with circles fillstyle pattern 4 transparent lc rgb '#990000' title \"Obstacles\"\n";
 
             gp.send1d(start);
             gp.send1d(goal);
-            gp.send1d(v);
-            gp.send1d(conn);
-            gp.send1d(obs);
+            gp.send1d(nodes);
+            gp.send1d(connections);
+            gp.send1d(obstacles);
+        }
+
+        void drawGraph3D(nodeT& start,
+                            nodeT& goal,
+                            nodeT& nodes, 
+                            connectionT& connections,
+                           obstacleT& obstacles
+        ){
+            gp << "splot '-' using 1:2:3 with points pt 35 ps 3 title \"Start\", \
+            '-' using 1:2:3 with points pt 35 ps 3 title \"goal\", \
+            '-' using 1:2:3 with points pt 7 title \"Nodes\", \
+            '-' using 1:2:3:4:5:6 with vector title \"Connections\", \
+            '-' using 1:2:3:4 with circles fillstyle pattern 4 transparent lc rgb '#990000' title \"Obstacles\"\n";
+
+            gp.send1d(start);
+            gp.send1d(goal);
+            gp.send1d(nodes);
+            gp.send1d(connections);
+            gp.send1d(obstacles);
         }
 
         void drawObstacle(std::vector<boost::tuple<double, double, double>>& v){
@@ -93,7 +126,7 @@ class Plot{
 
 };
 
-void formGraph(connection& connectionVector,vector<boost::tuple<double, double>>& nodeVector,Node& node){
+void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
     nodeVector.push_back(boost::make_tuple(node.x, node.y));
     if(!node.childNodes.size()>0){
         return;
@@ -114,11 +147,11 @@ int main(){
     Plot plot;
     // plot.setTitle("RRT").xlabel("X").ylabel("Y");
 
-    vector<boost::tuple<double, double, double, double>> connectionVector;
-    vector<boost::tuple<double, double, double>> obstacleVector;
-    vector<boost::tuple<double, double>> nodeVector;
-    vector<boost::tuple<double, double>> startVector;
-    vector<boost::tuple<double, double>> goalVector;
+    connectionT connectionVector;
+    obstacleT obstacleVector;
+    nodeT nodeVector;
+    nodeT startVector;
+    nodeT goalVector;
     
     for(Obstacle obstacle: space.obstacles ){
         obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
@@ -139,7 +172,7 @@ int main(){
         Node& currentNode = space.start;
         
         formGraph(connectionVector, nodeVector, currentNode);
-        plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
+        plot.drawGraph3D(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
