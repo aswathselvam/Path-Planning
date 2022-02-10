@@ -58,7 +58,7 @@ class Plot{
             gp.send1d(v);
         }
 
-        void drawEverything(std::vector<boost::tuple<double, double>>& v, 
+        void drawGraph(std::vector<boost::tuple<double, double>>& v, 
                             std::vector<boost::tuple<double, double, double, double>>& conn
         ){
             gp << "plot '-' using 1:2 with points pt 7, '-' using 1:2:3:4 with vector notitle\n";
@@ -86,7 +86,7 @@ class Plot{
 
 };
 
-void drawConnections(connection& connectionVector,vector<boost::tuple<double, double>>& nodeVector,Node& node){
+void formGraph(connection& connectionVector,vector<boost::tuple<double, double>>& nodeVector,Node& node){
     nodeVector.push_back(boost::make_tuple(node.x, node.y));
     if(!node.childNodes.size()>0){
         return;
@@ -94,9 +94,7 @@ void drawConnections(connection& connectionVector,vector<boost::tuple<double, do
     for(Node* childnode : node.childNodes){
         // Add to connection
         connectionVector.push_back(boost::make_tuple(node.x, node.y, childnode->x-node.x, childnode->y-node.y));
-        std::cout<<"\nPArent x: "<<node.x<<" Parent y: "<<node.y<<std::endl<<std::endl;
-        std::cout<<"\nChild x: "<<childnode->x<<" Child y: "<<childnode->y<<std::endl<<std::endl;
-        drawConnections(connectionVector, nodeVector, *childnode);
+        formGraph(connectionVector, nodeVector, *childnode);
     }
     
 }
@@ -118,7 +116,6 @@ int main(){
     for(Obstacle obstacle: space.obstacles ){
         obstacleVector.push_back(boost::make_tuple(obstacle.x,obstacle.y,obstacle.r));
     }
-    plot.drawObstacle(obstacleVector);
 
     while (!found)
     {   
@@ -131,15 +128,13 @@ int main(){
         connectionVector.clear();
         Node& currentNode = space.start;
         
-        drawConnections(connectionVector, nodeVector, currentNode);
+        formGraph(connectionVector, nodeVector, currentNode);
 
-        // plot.drawNode(nodeVector);
-        // plot.drawConnection(connectionVector);
-        plot.drawEverything(nodeVector, connectionVector);
+        plot.drawObstacle(obstacleVector);
+        plot.drawGraph(nodeVector, connectionVector);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        std::cout<<"Solution found: "<<found;
     }
     
     return 0;
