@@ -66,49 +66,49 @@ class Plot{
             gp.send1d(obstacles);
         }
 
-        void drawGraph3D(nodeT& start,
-                            nodeT& goal,
-                            nodeT& nodes, 
-                            connectionT& connections,
-                           obstacleT& obstacles
-        ){
-            gp<<"set parametric\n";
-            gp<<"set urange [0:2*pi]\n";
-            gp<<"set vrange [-pi/2:pi/2]\n";
-            gp<<"fx(x,r,v,u) = x + r*cos(v)*cos(u)\n";
-            gp<<"fy(y,r,v,u) = y + r*cos(v)*sin(u)\n";
-            gp<<"fz(z,r,v)   = z + r*sin(v)\n";
-            gp<<"set xrange [-5:50]\n";
-            gp<<"set yrange [-5:50]\n";
-            gp<<"set zrange [-5:50]\n";
-            gp<<"set hidden3d\n";
-            gp<<"set size square\n";
-            setTitle("RRT").xlabel("X").ylabel("Y").zlabel("Z");
-            gp<<"x="<<0<<"\n";
-            gp<<"y="<<0<<"\n";
-            gp<<"z="<<0<<"\n";
-            gp<<"r="<<0<<"\n";
-            gp<<"splot fx(x,r,v,u),fy(y,r,v,u),fz(z,r,v) notitle\n";
-            for(auto obstacle: obstacles){
-                gp<<"replot fx("<<obstacle.get<0>()<<","<<obstacle.get<3>()<<",v,u),fy("
-                <<obstacle.get<1>()<<","<<obstacle.get<3>()<<",v,u),fz("
-                <<obstacle.get<2>()<<","<<obstacle.get<3>()<<",v) notitle\n";
-                // gp<<"pause 1\n";
-            }
+        // void drawGraph3D(nodeT& start,
+        //                     nodeT& goal,
+        //                     nodeT& nodes, 
+        //                     connectionT& connections,
+        //                    obstacleT& obstacles
+        // ){
+        //     gp<<"set parametric\n";
+        //     gp<<"set urange [0:2*pi]\n";
+        //     gp<<"set vrange [-pi/2:pi/2]\n";
+        //     gp<<"fx(x,r,v,u) = x + r*cos(v)*cos(u)\n";
+        //     gp<<"fy(y,r,v,u) = y + r*cos(v)*sin(u)\n";
+        //     gp<<"fz(z,r,v)   = z + r*sin(v)\n";
+        //     gp<<"set xrange [-5:50]\n";
+        //     gp<<"set yrange [-5:50]\n";
+        //     gp<<"set zrange [-5:50]\n";
+        //     gp<<"set hidden3d\n";
+        //     gp<<"set size square\n";
+        //     setTitle("RRT").xlabel("X").ylabel("Y").zlabel("Z");
+        //     gp<<"x="<<0<<"\n";
+        //     gp<<"y="<<0<<"\n";
+        //     gp<<"z="<<0<<"\n";
+        //     gp<<"r="<<0<<"\n";
+        //     gp<<"splot fx(x,r,v,u),fy(y,r,v,u),fz(z,r,v) notitle\n";
+        //     for(auto obstacle: obstacles){
+        //         gp<<"replot fx("<<obstacle.get<0>()<<","<<obstacle.get<3>()<<",v,u),fy("
+        //         <<obstacle.get<1>()<<","<<obstacle.get<3>()<<",v,u),fz("
+        //         <<obstacle.get<2>()<<","<<obstacle.get<3>()<<",v) notitle\n";
+        //         // gp<<"pause 1\n";
+        //     }
             
-            gp<<"replot '-' using 1:2:3 with points pt 35 ps 3 title \"Start\", \
-            '-' using 1:2:3 with points pt 35 ps 3 title \"goal\", \
-            '-' using 1:2:3 with points pt 7 title \"Nodes\", \
-            '-' using 1:2:3:4:5:6 with vector title \"Connections\"\n";
-            //'-' using 1:2:3:4:5 with points pt 7 ps 10 title \"Obstacles\"\n";
+        //     gp<<"replot '-' using 1:2:3 with points pt 35 ps 3 title \"Start\", \
+        //     '-' using 1:2:3 with points pt 35 ps 3 title \"goal\", \
+        //     '-' using 1:2:3 with points pt 7 title \"Nodes\", \
+        //     '-' using 1:2:3:4:5:6 with vector title \"Connections\"\n";
+        //     //'-' using 1:2:3:4:5 with points pt 7 ps 10 title \"Obstacles\"\n";
 
-            gp.send1d(start);
-            gp.send1d(goal);
-            gp.send1d(nodes);
-            gp.send1d(connections);
-            gp<<"pause 0.3\n";
+        //     gp.send1d(start);
+        //     gp.send1d(goal);
+        //     gp.send1d(nodes);
+        //     gp.send1d(connections);
+        //     gp<<"pause 0.3\n";
  
-        }
+        // }
 
         void drawObstacle(std::vector<boost::tuple<double, double, double>>& v){
             gp << "plot '-' using 1:2:3 with circles notitle\n";
