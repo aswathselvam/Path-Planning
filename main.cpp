@@ -103,20 +103,26 @@ class Plot{
             gp<<"set parametric\n";
             gp<<"set urange [0:2*pi]\n";
             gp<<"set vrange [-pi/2:pi/2]\n";
-            gp<<"fx(x,v,u) = x + r*cos(v)*cos(u)\n";
-            gp<<"fy(y,v,u) = y + r*cos(v)*sin(u)\n";
-            gp<<"fz(z,v)   = z + r*sin(v)\n";
-
-            gp<<"splot fx(x,v,u),fy(y,v,u),fz(z,v)\n";
-
+            gp<<"fx(x,r,v,u) = x + r*cos(v)*cos(u)\n";
+            gp<<"fy(y,r,v,u) = y + r*cos(v)*sin(u)\n";
+            gp<<"fz(z,r,v)   = z + r*sin(v)\n";
+            gp<<"set xrange [-5:50]\n";
+            gp<<"set yrange [-5:50]\n";
+            gp<<"set zrange [-5:50]\n";
+            gp<<"set hidden3d\n";
+            gp<<"set size square\n";
+            gp<<"x="<<0<<"\n";
+            gp<<"y="<<0<<"\n";
+            gp<<"z="<<0<<"\n";
+            gp<<"r="<<0<<"\n";
+            gp<<"splot fx(x,r,v,u),fy(y,r,v,u),fz(z,r,v) notitle\n";
             for(auto obstacle: obstacles){
-                gp<<"x="<<obstacle.get<0>()<<"\n";
-                gp<<"y="<<obstacle.get<1>()<<"\n";
-                gp<<"z="<<obstacle.get<2>()<<"\n";
-                gp<<"r="<<obstacle.get<3>()<<"\n";
-                gp<<"replot fx(x,v,u),fy(y,v,u),fz(z,v)\n";
-
+                gp<<"replot fx("<<obstacle.get<0>()<<","<<obstacle.get<3>()<<",v,u),fy("
+                <<obstacle.get<1>()<<","<<obstacle.get<3>()<<",v,u),fz("
+                <<obstacle.get<2>()<<","<<obstacle.get<3>()<<",v) notitle\n";
+                // gp<<"pause 1\n";
             }
+            
             gp<<"replot '-' using 1:2:3 with points pt 35 ps 3 title \"Start\", \
             '-' using 1:2:3 with points pt 35 ps 3 title \"goal\", \
             '-' using 1:2:3 with points pt 7 title \"Nodes\", \
@@ -127,6 +133,7 @@ class Plot{
             gp.send1d(goal);
             gp.send1d(nodes);
             gp.send1d(connections);
+            gp<<"pause 0.3\n";
  
         }
 
@@ -220,7 +227,7 @@ int main(){
         formGraph3D(connectionVector, nodeVector, currentNode);
         plot.drawGraph3D(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     }
     
