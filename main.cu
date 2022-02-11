@@ -2,6 +2,7 @@
 #include <opencv2/core.hpp>
 #include <vector>
 #include "space.h"
+// #include <cuda_runtime.h> 
 
 #include <cmath>
 #include <thread>
@@ -10,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <typeinfo>
+
 
 using std::vector;
 
@@ -20,7 +22,13 @@ typedef vector<boost::tuple<double, double>> nodeT;
 typedef vector<boost::tuple<double, double, double>> obstacleT;
 #include "plot.h"
 
+Space<NodeDim, ObstacleDim> space;
 
+__global__ void cuda_solve(){
+    printf("\nKernel: Block ID: %d",blockIdx.x);
+    printf("\nKernel: Block dim: %d",blockDim.x);
+    printf("\nKernel: Thread ID: %d",threadIdx.x);
+}
 
 void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
     nodeVector.push_back(boost::make_tuple(node.x, node.y));
@@ -40,8 +48,8 @@ void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
 
 int main(){
 
-    Space<NodeDim, ObstacleDim> space;
     NodeDim& currentNode = space.start;
+    cuda_solve<<<10,10>>>(); 
 
     space.init();
     bool found=false;
@@ -62,9 +70,6 @@ int main(){
     while (!found)
     {   
         found = space.solve();
-
-        int c=0;
-        int a;
 
         nodeVector.clear();
         connectionVector.clear();
