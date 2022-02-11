@@ -55,8 +55,7 @@ class Space{
         vector<NodeDim> nodes;
         void init();
         bool solve();
-        bool checkCollision(Node& node);
-        bool checkCollision(Node3D& node);
+        bool checkCollision(NodeDim& node);
         NodeDim start;
         NodeDim goal;
         NodeDim& addNode();

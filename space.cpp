@@ -50,8 +50,8 @@ template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
     NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1};
 
-    double distt=std::numeric_limits<double>::max();
-    NodeDim& nearestnode = getNearestNode(distt,this->start,*node);
+    double inf=std::numeric_limits<double>::max();
+    NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
 
     directionComponent(nearestnode, *node);
 
@@ -102,7 +102,7 @@ void Space<NodeDim, ObstacleDim>::directionComponent(Node3D& n1to, Node3D& n2){
 }
 
 template <class NodeDim, class ObstacleDim>
-bool Space<NodeDim, ObstacleDim>::checkCollision(Node& node){
+bool Space<NodeDim, ObstacleDim>::checkCollision(NodeDim& node){
     for(ObstacleDim& obstacle : this->obstacles){
         if(L2(obstacle, node) < 2*obstacle.r){
             return true;
@@ -123,7 +123,7 @@ NodeDim& Space<NodeDim, ObstacleDim>::getNearestNode(double& min_dist, NodeDim& 
         return currentNode;
     }
     for(NodeDim* childNode: currentNode.childNodes){
-        float dist = sqrt(pow(childNode->x-node.x,2) + pow(childNode->y-node.y,2) );
+        float dist = L2(*childNode, node);
         if(dist < min_dist){
             nearestnode = childNode;
             min_dist = dist;
