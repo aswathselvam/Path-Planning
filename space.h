@@ -2,23 +2,26 @@
 
 using std::vector;
 
-struct Obstacle{
+class Obstacle{
     public:
+        Obstacle(int);
         double x;
         double y;
         double r;
 };
 
-struct Obstacle3D{
+class Obstacle3D{
     public:
+        Obstacle3D(int);
         double x;
         double y;
         double z;
         double r;
 };
 
-struct Node{
+class Node{
     public:
+        void setup(double, double, double);
         double x;
         double y;
         Node* parentNode;
@@ -26,8 +29,9 @@ struct Node{
 
 };
 
-struct Node3D{
+class Node3D{
     public:
+        void setup(double, double, double);
         double x;
         double y;
         double z;

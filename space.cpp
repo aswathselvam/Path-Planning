@@ -3,22 +3,45 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <typeinfo>
+#include <variant>
+
+
 template class Space<Node, Obstacle>;
+
+Obstacle::Obstacle(int i){
+    this->x=(5-i)*10;
+    this->y=i*10;
+    this->r=i*1;
+}
+
+Obstacle3D::Obstacle3D(int i){
+    this->x=(5-i)*10;
+    this->y=i*10;
+    this->z=i;
+    this->r=i*1;
+}
+
+void Node::setup(double x, double y, double){
+    this->x = x;
+    this->y = y;
+}
+
+void Node3D::setup(double x, double y, double z){
+    this->x = x;
+    this->y = y;
+    this->z = z;
+}
 
 template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::init(){
-    srand (1);
-    start.x = 10;
-    start.y = 10;
+    start.setup(10.0, 10.0, 10.0);
+    goal.setup(10.0, 50.0, 50.0);
 
-    goal.x = 10;
-    goal.y = 50;
+    srand (1);
 
     for(int i = 0; i<5 ;i++){
-        ObstacleDim obstacle;
-        obstacle.x=(5-i)*10;
-        obstacle.y=i*10;
-        obstacle.r=i*1;
+        ObstacleDim obstacle(i);
         obstacles.push_back(obstacle);
     }
 }
