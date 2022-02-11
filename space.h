@@ -21,6 +21,7 @@ class Obstacle3D{
 
 class Node{
     public:
+        Node(double, double, double);
         void setup(double, double, double);
         double x;
         double y;

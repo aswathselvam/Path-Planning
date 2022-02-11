@@ -16,13 +16,18 @@ Obstacle::Obstacle(int i){
 }
 
 Obstacle3D::Obstacle3D(int i){
-    this->x=(5-i)*10;
-    this->y=i*10;
-    this->z=i;
-    this->r=i*1;
+    this->x=(5-i)*11;
+    this->y=i*11;
+    this->z=i*2;
+    this->r=i*3;
 }
 
-void Node::setup(double x, double y, double){
+Node::Node(double x, double y, double z){
+    this->x = x;
+    this->y = y;
+}
+
+void Node::setup(double x, double y, double z){
     this->x = x;
     this->y = y;
 }
@@ -48,7 +53,7 @@ void Space<NodeDim, ObstacleDim>::init(){
 
 template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
-    NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1, rand() % 100 + 1};
+    NodeDim* node = new NodeDim{rand() % 100 + 1.0, rand() % 100 + 1.0, rand() % 100 + 1.0};
 
     double inf=std::numeric_limits<double>::max();
     NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
