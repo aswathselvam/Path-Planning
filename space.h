@@ -35,8 +35,8 @@ class Node3D{
         double x;
         double y;
         double z;
-        Node* parentNode;
-        vector<Node*> childNodes;
+        Node3D* parentNode;
+        vector<Node3D*> childNodes;
 
 };
 

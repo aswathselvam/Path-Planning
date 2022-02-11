@@ -7,7 +7,7 @@
 #include <variant>
 
 
-template class Space<Node, Obstacle>;
+template class Space<Node3D, Obstacle3D>;
 
 Obstacle::Obstacle(int i){
     this->x=(5-i)*10;
@@ -48,7 +48,7 @@ void Space<NodeDim, ObstacleDim>::init(){
 
 template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
-    NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1};
+    NodeDim* node = new NodeDim{rand() % 100 + 1, rand() % 100 + 1, rand() % 100 + 1};
 
     double inf=std::numeric_limits<double>::max();
     NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
