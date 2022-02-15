@@ -52,8 +52,6 @@ int main(){
     }
     startVector.push_back(boost::make_tuple(space.start.x, space.start.y, space.start.z));
     goalVector.push_back(boost::make_tuple(space.goal.x, space.goal.y, space.goal.z));
-            plot.drawobs(obstacleVector);
-
 
     while (!found)
     {   
