@@ -43,6 +43,13 @@ class Plot{
             gp<<"set xrange [0:100]\n";
             gp<<"set yrange [0:100]\n";
             gp<<"set zrange [0:100]\n";
+            gp<<"set xtics 1\n";
+            gp<<"set ytics 1\n";
+            gp<<"set ztics 1\n";
+            gp<<"set grid\n";
+            gp<<"set format x \"\"\n";
+            gp<<"set format y \"\"\n"; 
+            gp<<"set format z \"\"\n";           
         }
 
         Plot& xlabel(std::string xlabel){
