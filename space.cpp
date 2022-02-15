@@ -34,6 +34,11 @@ void Node3D::setup(double x, double y, double z){
 }
 
 template <class NodeDim, class ObstacleDim>
+Space<NodeDim, ObstacleDim>::Space() : goalnode(goal){
+
+}
+
+template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::init(){
     start.setup(10.0, 10.0, 10.0);
     goal.setup(10.0, 50.0, 50.0);
@@ -114,6 +119,7 @@ bool Space<NodeDim, ObstacleDim>::checkCollision(NodeDim& node){
 template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::addConnection(NodeDim& a, NodeDim& b){
     a.childNodes.push_back(&b);
+    b.parentNode=&a;
 }
 
 template <class NodeDim, class ObstacleDim>
@@ -143,6 +149,7 @@ bool Space<NodeDim, ObstacleDim>::solve(){
 
     if(node!=nullptr){
         if(L2(goal,*node) < 5){
+            goalnode = *node;
             return true;
         }
     }

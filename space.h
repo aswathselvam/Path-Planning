@@ -43,7 +43,7 @@ class Node3D{
 template <class NodeDim, class ObstacleDim>
 class Space{
     public:
-        // Space();
+        Space();
         double L2(Node&, Node&);
         double L2(Node3D&, Node3D&);
         double L2(Obstacle&, Node&);
@@ -58,6 +58,7 @@ class Space{
         bool checkCollision(NodeDim& node);
         NodeDim start;
         NodeDim goal;
+        NodeDim& goalnode;
         NodeDim& addNode();
         NodeDim& getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node);
         void addConnection(NodeDim& a, NodeDim& b);

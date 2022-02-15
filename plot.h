@@ -47,11 +47,38 @@ class Plot{
             gp.send1d(v);
         }
 
+        void drawPath(std::vector<boost::tuple<double, double, double, double>>& v){
+            gp << "plot '-' using 1:2:3:4 with vector head filled lt 2 lw 3 lc 2 title \"Path\"\n";
+            gp.send1d(v);
+        }
+
         void drawGraph(nodeT& start,
                             nodeT& goal,
                             nodeT& nodes, 
                             connectionT& connections,
-                            obstacleT& obstacles
+                            obstacleT& obstacles,
+                            connectionT& path
+        ){
+            gp << "plot '-' using 1:2 with points pt 35 ps 3 title \"Start\", \
+            '-' using 1:2 with points pt 35 ps 3 title \"goal\", \
+             '-' using 1:2 with points pt 7 title \"Nodes\", \
+             '-' using 1:2:3:4 with vector title \"Connections\", \
+             '-' using 1:2:3 with circles fillstyle pattern 4 transparent lc rgb '#990000' title \"Obstacles\", \
+             '-' using 1:2:3:4 with vector head filled lt 2 lw 3 lc 2 title \"Path\"\n";
+
+            gp.send1d(start);
+            gp.send1d(goal);
+            gp.send1d(nodes);
+            gp.send1d(connections);
+            gp.send1d(obstacles);
+            gp.send1d(path);
+        }
+
+        void drawGraph(nodeT& start,
+                    nodeT& goal,
+                    nodeT& nodes, 
+                    connectionT& connections,
+                    obstacleT& obstacles
         ){
             gp << "plot '-' using 1:2 with points pt 35 ps 3 title \"Start\", \
             '-' using 1:2 with points pt 35 ps 3 title \"goal\", \

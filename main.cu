@@ -43,7 +43,14 @@ void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
     
 }
 
+void formPath(connectionT& connectionVector,Node& node){
+    if(!node.parentNode){
+        return;
+    }
+    connectionVector.push_back(boost::make_tuple(node.x, node.y, node.parentNode->x-node.x, node.parentNode->y-node.y));
+    formPath(connectionVector,*node.parentNode);
 
+}
 
 
 int main(){
@@ -80,6 +87,10 @@ int main(){
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     }
+    
+    connectionT pathVector;
+    formPath(pathVector, space.goalnode);
+    plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector, pathVector);
     
     return 0;
 } 
