@@ -39,6 +39,12 @@ class Plot{
     public:
         Gnuplot gp;
 
+        Plot(){
+            gp<<"set xrange [0:100]\n";
+            gp<<"set yrange [0:100]\n";
+            gp<<"set zrange [0:100]\n";
+        }
+
         Plot& xlabel(std::string xlabel){
             gp << "set xlabel '"<<xlabel<<"'\n";
             return *this;
