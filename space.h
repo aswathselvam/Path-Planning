@@ -41,10 +41,12 @@ using std::vector;
 
 class Obstacle{
     public:
+        Obstacle(); 
         Obstacle(int);
         double x;
         double y;
         double r;
+        bool intersected;
 };
 
 class Obstacle3D{
@@ -89,10 +91,13 @@ class Space{
         void directionComponent(Node&, Node&);
         void directionComponent(Node3D&, Node3D&);
         vector<ObstacleDim> obstacles;
+        ObstacleDim* h_obstacles;
+        ObstacleDim* d_obstacles;
         vector<NodeDim> nodes;
         void init();
         bool solve();
         bool checkCollision(NodeDim& node);
+        __global__ void cudaCheckCollision(ObstacleDim* d_obstacles, NodeDim node);
         NodeDim start;
         NodeDim goal;
         NodeDim& goalnode;

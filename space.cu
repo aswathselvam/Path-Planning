@@ -46,6 +46,12 @@
 
 template class Space<Node, Obstacle>;
 
+Obstacle::Obstacle(){
+    this->x=(5)*10;
+    this->y=1*10;
+    this->r=1*1;
+}
+
 Obstacle::Obstacle(int i){
     this->x=(5-i)*10;
     this->y=i*10;
@@ -82,10 +88,20 @@ void Space<NodeDim, ObstacleDim>::init(){
 
     srand (1);
 
-    for(int i = 0; i<5 ;i++){
+    int N=5; 
+    h_obstacles = new ObstacleDim[N];
+    for(int i = 0; i<N ;i++){
         ObstacleDim obstacle(i);
-        obstacles.push_back(obstacle);
+        obstacle.intersected = true;
+        h_obstacles[i] = obstacle;
     }
+
+	cudaMalloc(&d_obstacles, N*sizeof(ObstacleDim));
+	cudaMemcpy(d_obstacles, h_obstacles, N*sizeof(ObstacleDim), cudaMemcpyHostToDevice);
+    NodeDim* node = new NodeDim{rand() % 100 + 1.0, rand() % 100 + 1.0};
+    cudaCheckCollision<<<1,N>>>(d_obstacles, *node); 
+    cudaMemcpy(h_obstacles, d_obstacles, N*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
+
 }
 
 template <class NodeDim, class ObstacleDim>
@@ -151,6 +167,15 @@ bool Space<NodeDim, ObstacleDim>::checkCollision(NodeDim& node){
         }
     }
     return false;
+}
+
+template <class NodeDim, class ObstacleDim>
+__global__ void Space<NodeDim, ObstacleDim>::cudaCheckCollision(ObstacleDim* d_obstacles, NodeDim node){
+    int idx = blockIdx.x + threadIdx.x + blockDim.x;
+    // if(L2(d_obstacles[idx], node) < 2*d_obstacles[idx].r){
+    //     return true;
+    // }
+    // return false;
 }
 
 template <class NodeDim, class ObstacleDim>

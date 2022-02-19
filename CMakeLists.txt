@@ -1,9 +1,18 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(path_planning)
+cmake_minimum_required(VERSION 3.8)
+project(path_planning CUDA CXX)
+
+SET(CUDA_SEPARABLE_COMPILATION ON)
 
 find_package(OpenCV)
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(CUDA REQUIRED)
+
+
+add_library(spacelib STATIC
+space.cu
+space.h
+  )
+  target_compile_features(spacelib PUBLIC cxx_std_11)
 
 # set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 # SET(CUDA_HOST_COMPILER /usr/bin/g++)
@@ -32,9 +41,10 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 #   ${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc
 # )
 
-cuda_add_executable(main main.cu space.cpp)
+set_target_properties(spacelib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+add_executable(main main.cu)
 # add_executable(rrt3d rrt3d.cpp space.cpp)
 
-
-target_link_libraries(main ${OpenCV_LIBS} ${Boost_LIBRARIES})
+set_target_properties(main PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_link_libraries(main ${OpenCV_LIBS} ${Boost_LIBRARIES} spacelib)
 # target_link_libraries(rrt3d ${OpenCV_LIBS} ${Boost_LIBRARIES})

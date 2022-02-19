@@ -61,10 +61,9 @@ typedef vector<boost::tuple<double, double, double>> obstacleT;
 
 Space<NodeDim, ObstacleDim> space;
 
-__global__ void cuda_solve(){
-    printf("\nKernel: Block ID: %d",blockIdx.x);
-    printf("\nKernel: Block dim: %d",blockDim.x);
-    printf("\nKernel: Thread ID: %d",threadIdx.x);
+__global__ void cudaCheckCollision(){
+    int idx = blockIdx.x + threadIdx.x + blockDim.x;
+
 }
 
 void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
@@ -93,9 +92,11 @@ void formPath(connectionT& connectionVector,Node& node){
 int main(){
 
     NodeDim& currentNode = space.start;
-    cuda_solve<<<10,10>>>(); 
 
     space.init();
+
+    return 0;
+    
     bool found=false;
     Plot plot;
     connectionT connectionVector;
