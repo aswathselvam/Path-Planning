@@ -97,7 +97,7 @@ class Space{
         void init();
         bool solve();
         bool checkCollision(NodeDim& node);
-        __global__ void cudaCheckCollision(ObstacleDim* d_obstacles, NodeDim node);
+        __global__ void cudaCheckCollision(ObstacleDim*, NodeDim);
         NodeDim start;
         NodeDim goal;
         NodeDim& goalnode;
