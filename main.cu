@@ -48,9 +48,13 @@
 #include <string>
 #include <string_view>
 #include <typeinfo>
+#include <chrono>
+
 
 
 using std::vector;
+using std::cout;
+using std::endl;
 
 typedef Node NodeDim;
 typedef Obstacle ObstacleDim;
@@ -94,8 +98,6 @@ int main(){
     NodeDim& currentNode = space.start;
 
     space.init();
-
-    return 0;
     
     bool found=false;
     Plot plot;
@@ -112,6 +114,8 @@ int main(){
     startVector.push_back(boost::make_tuple(space.start.x, space.start.y));
     goalVector.push_back(boost::make_tuple(space.goal.x, space.goal.y));
 
+    int count = 0;
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     while (!found)
     {   
         found = space.solve();
@@ -123,6 +127,8 @@ int main(){
         plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        
+
 
     }
     

@@ -105,6 +105,7 @@ class Space{
         void addConnection(NodeDim& a, NodeDim& b);
 
         double delta;
+        int N_OF_OBSTACLES;
 
 };
 
