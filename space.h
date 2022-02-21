@@ -85,7 +85,7 @@ class Space{
         Space();
         double L2(Node&, Node&);
         double L2(Node3D&, Node3D&);
-        double L2(Obstacle&, Node&);
+        __host__ __device__ double L2(Obstacle&, Node&);
         double L2(Obstacle3D&, Node3D&);
         
         void directionComponent(Node&, Node&);
@@ -97,7 +97,6 @@ class Space{
         void init();
         bool solve();
         bool checkCollision(NodeDim& node);
-        __global__ void cudaCheckCollision(ObstacleDim* d_obstacles, NodeDim node);
         NodeDim start;
         NodeDim goal;
         NodeDim& goalnode;
@@ -108,3 +107,7 @@ class Space{
         double delta;
 
 };
+
+
+template <class NodeDim, class ObstacleDim>
+__global__ void cudaCheckCollision(Space<NodeDim, ObstacleDim>* spacep, Obstacle* d_obstacles, Node* node);

@@ -99,7 +99,7 @@ void Space<NodeDim, ObstacleDim>::init(){
 	cudaMalloc(&d_obstacles, N*sizeof(ObstacleDim));
 	cudaMemcpy(d_obstacles, h_obstacles, N*sizeof(ObstacleDim), cudaMemcpyHostToDevice);
     NodeDim* node = new NodeDim{rand() % 100 + 1.0, rand() % 100 + 1.0};
-    cudaCheckCollision<<<1,N>>>(d_obstacles, *node); 
+    cudaCheckCollision<<<1,N>>>(this, d_obstacles, *node); 
     cudaMemcpy(h_obstacles, d_obstacles, N*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
 
 }
@@ -127,7 +127,7 @@ double Space<NodeDim, ObstacleDim>::L2(Obstacle& obstacle, Node& node){
 }
 
 template <class NodeDim, class ObstacleDim>
-double Space<NodeDim, ObstacleDim>::L2(Obstacle3D& obstacle, Node3D& node){
+__host__ __device__ double Space<NodeDim, ObstacleDim>::L2(Obstacle3D& obstacle, Node3D& node){
     return sqrt(pow(obstacle.x-node.x,2) + pow(obstacle.y-node.y,2) + pow(obstacle.z-node.z,2) );
 }
 
@@ -170,11 +170,14 @@ bool Space<NodeDim, ObstacleDim>::checkCollision(NodeDim& node){
 }
 
 template <class NodeDim, class ObstacleDim>
-__global__ void Space<NodeDim, ObstacleDim>::cudaCheckCollision(ObstacleDim* d_obstacles, NodeDim node){
-    int idx = blockIdx.x + threadIdx.x + blockDim.x;
-    // if(L2(d_obstacles[idx], node) < 2*d_obstacles[idx].r){
-    //     return true;
-    // }
+__global__ void cudaCheckCollision(Space<NodeDim, ObstacleDim>* spacep, Obstacle* d_obstacles, Node node){
+    int idx = blockIdx.x + threadIdx.x ;//+ blockDim.x;
+    double dist = spacep->L2(d_obstacles[idx], node);
+    printf("idx: %d, dist: %f\n",idx,dist);
+    if(dist<2*d_obstacles[idx].r){
+
+        //  return true;
+    }
     // return false;
 }
 
