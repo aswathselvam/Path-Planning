@@ -104,6 +104,8 @@ class Space{
         NodeDim& getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node);
         void addConnection(NodeDim& a, NodeDim& b);
 
+        int width;
+        int height;
         double delta;
         int N_OF_OBSTACLES;
 

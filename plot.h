@@ -39,9 +39,9 @@ class Plot{
     public:
         Gnuplot gp;
 
-        Plot(){
-            gp<<"set xrange [0:100]\n";
-            gp<<"set yrange [0:100]\n";
+        Plot(int width, int height){
+            gp<<"set xrange [0:"<<width<<"]\n";
+            gp<<"set yrange [0:"<<height<<"]\n";
             gp<<"set zrange [0:100]\n";
             gp<<"set xtics 1\n";
             gp<<"set ytics 1\n";

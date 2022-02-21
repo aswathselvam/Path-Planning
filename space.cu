@@ -85,19 +85,21 @@ Space<NodeDim, ObstacleDim>::Space() : goalnode(goal){
 
 template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::init(){
+    width=300;
+    height=width;
     start.setup(10.0, 10.0, 10.0);
-    goal.setup(10.0, 50.0, 50.0);
+    goal.setup(width-10.2, 50.0, 50.0);
 
     srand (1);
 
-    N_OF_OBSTACLES=5; 
+    N_OF_OBSTACLES=1000; 
     h_obstacles = new ObstacleDim[N_OF_OBSTACLES];
     for(int i = 0; i<N_OF_OBSTACLES ;i++){
         ObstacleDim obstacle(i);
         obstacle.intersected = false;
-        obstacle.x=rand() % 100;
-        obstacle.y=rand() % 100;
-        obstacle.r=rand() % 8;
+        obstacle.x=rand() % width;
+        obstacle.y=rand() % height;
+        obstacle.r=rand() % 3;
         h_obstacles[i] = obstacle;
         this->obstacles.push_back(obstacle);
     }
@@ -110,22 +112,27 @@ void Space<NodeDim, ObstacleDim>::init(){
 template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
 
-    NodeDim* node = new NodeDim{rand() % 100 + 1.0, rand() % 100 + 1.0};
+    NodeDim* node = new NodeDim{rand() % width + 1.0, rand() % height + 1.0};
 
     double inf=std::numeric_limits<double>::max();
     NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
 
     directionComponent(nearestnode, *node);
 
-    cudaCheckCollision<<<1, N_OF_OBSTACLES>>>(this, d_obstacles, *node); 
-    cudaMemcpy(h_obstacles, d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
     bool collision = false;
-    for(int i =0; i< N_OF_OBSTACLES; i++){
-        ObstacleDim d = h_obstacles[i];
-        if(d.intersected){
-            collision=true;
-            // cout<<"Collision detected at x: "<<d.x<<" y: "<<d.y<<endl;
+    bool CUDA=false;
+    if(CUDA){
+        cudaCheckCollision<<<1, N_OF_OBSTACLES>>>(this, d_obstacles, *node); 
+        cudaMemcpy(h_obstacles, d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
+        for(int i =0; i< N_OF_OBSTACLES; i++){
+            ObstacleDim d = h_obstacles[i];
+            if(d.intersected){
+                collision=true;
+                // cout<<"Collision detected at x: "<<d.x<<" y: "<<d.y<<endl;
+            }
         }
+    }else{
+        collision = checkCollision(*node);
     }
       
     if(collision){

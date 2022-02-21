@@ -100,7 +100,7 @@ int main(){
     space.init();
     
     bool found=false;
-    Plot plot;
+    Plot plot(space.width, space.height);
     connectionT connectionVector;
     obstacleT obstacleVector;
     nodeT nodeVector;
@@ -120,16 +120,23 @@ int main(){
     {   
         found = space.solve();
 
-        nodeVector.clear();
-        connectionVector.clear();
-        
-        formGraph(connectionVector, nodeVector, currentNode);
-        plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
+        // nodeVector.clear();
+        // connectionVector.clear();
+        // formGraph(connectionVector, nodeVector, currentNode);
+        // plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         
 
-
+        if(count%10==0){
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[µs]" << endl;
+            // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() << "[ns]" << std::endl;
+            // cout<<"Iteration: "<<count<<"\t\t: "<<std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<endl;
+            cout<<std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<endl;
+            std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        }
+        count++;
     }
     
     connectionT pathVector;
