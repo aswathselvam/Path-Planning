@@ -85,21 +85,21 @@ Space<NodeDim, ObstacleDim>::Space() : goalnode(goal){
 
 template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::init(){
-    width=300;
+    width=100;
     height=width;
     start.setup(10.0, 10.0, 10.0);
     goal.setup(width-10.2, 50.0, 50.0);
 
     srand (1);
 
-    N_OF_OBSTACLES=1000; 
+    N_OF_OBSTACLES=10; 
     h_obstacles = new ObstacleDim[N_OF_OBSTACLES];
     for(int i = 0; i<N_OF_OBSTACLES ;i++){
         ObstacleDim obstacle(i);
         obstacle.intersected = false;
         obstacle.x=rand() % width;
         obstacle.y=rand() % height;
-        obstacle.r=rand() % 3;
+        obstacle.r=rand() % 8;
         h_obstacles[i] = obstacle;
         this->obstacles.push_back(obstacle);
     }
@@ -120,12 +120,12 @@ NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
     directionComponent(nearestnode, *node);
 
     bool collision = false;
-    bool CUDA=false;
+    bool CUDA=true;
     if(CUDA){
         cudaCheckCollision<<<1, N_OF_OBSTACLES>>>(this, d_obstacles, *node); 
-        cudaMemcpy(h_obstacles, d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
+        // cudaMemcpy(h_obstacles, d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
         for(int i =0; i< N_OF_OBSTACLES; i++){
-            ObstacleDim d = h_obstacles[i];
+            ObstacleDim d = d_obstacles[i];
             if(d.intersected){
                 collision=true;
                 // cout<<"Collision detected at x: "<<d.x<<" y: "<<d.y<<endl;
