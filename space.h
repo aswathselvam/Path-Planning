@@ -37,6 +37,12 @@
 
 #include <vector>
 
+#ifdef NO_CUDA
+#define __host__
+#define __device__
+#define __global__
+#endif
+
 using std::vector;
 
 class Obstacle {
@@ -85,7 +91,7 @@ class Node {
   void setup(double x, double y, double dummy);
   double x;                  ///< X coordinate of Node.
   double y;                  ///< Y coordinate of Node.
-  Node* parentNode;          ///< Pointer to Parent Node.
+  Node* parentNode = nullptr;          ///< Pointer to Parent Node.
   vector<Node*> childNodes;  ///< Vector of Pointers to Child Nodes.
 };
 
@@ -101,7 +107,7 @@ class Node3D {
   double x;                    ///< X coordinate of Node.
   double y;                    ///< Y coordinate of Node.
   double z;                    ///< Z coordinate of Node.
-  Node3D* parentNode;          ///< Pointer to Parent Node.
+  Node3D* parentNode = nullptr;          ///< Pointer to Parent Node.
   vector<Node3D*> childNodes;  ///< Pointer to Child Nodes.
 };
 
@@ -112,6 +118,7 @@ class Space {
    * @brief Default contstructor for Space class.
    */
   Space();
+  ~Space();
 
   /**
    * @brief Calculate Euclidean distance between Obstacle and Node.
@@ -119,7 +126,7 @@ class Space {
    * @param Node Reference to 2D Node object.
    * @return Distance between the 2D Node and a 2D Node.
    */
-  double L2(Node&, Node&);
+  static double L2(Node&, Node&);
 
   /**
    * @brief Calculate Euclidean distance between Obstacle and Node.
@@ -127,7 +134,7 @@ class Space {
    * @param Node3D Reference to 3D Node object.
    * @return Distance between the 3D Node and a 3D Node.
    */
-  double L2(Node3D&, Node3D&);
+  static double L2(Node3D&, Node3D&);
 
   /**
    * @brief Calculate Euclidean distance between Obstacle and Node.
@@ -135,7 +142,7 @@ class Space {
    * @param Node Reference to 2D Node object.
    * @return Distance between the 2D Obstacle and a 2D Node.
    */
-  __host__ __device__ double L2(Obstacle&, Node&);
+  __host__ __device__ static double L2(Obstacle&, Node&);
 
   /**
    * @brief Calculate Euclidean distance between Obstacle and Node.
@@ -143,7 +150,7 @@ class Space {
    * @param Node3D Reference to 3D Node object.
    * @return Distance between the 3D Obstacle and a 3D Node.
    */
-  double L2(Obstacle3D&, Node3D&);
+  static double L2(Obstacle3D&, Node3D&);
 
   /**
    * @brief Assigns values to a node.
@@ -162,15 +169,15 @@ class Space {
 
 
   vector<ObstacleDim> obstacles;
-  ObstacleDim* h_obstacles;
-  ObstacleDim* d_obstacles;
-  vector<NodeDim> nodes;
+  ObstacleDim* h_obstacles = nullptr;
+  ObstacleDim* d_obstacles = nullptr;
+  vector<NodeDim*> all_nodes; // To manage memory
   void init();
   bool solve();
   bool checkCollision(NodeDim& node);
   NodeDim start;
   NodeDim goal;
-  NodeDim& goalnode;
+  NodeDim* goalnode = nullptr;
   NodeDim& addNode();
   NodeDim& getNearestNode(double& min_dist, NodeDim& currentNode,
                           NodeDim& node);
@@ -182,6 +189,8 @@ class Space {
   int N_OF_OBSTACLES;
 };
 
+#ifndef NO_CUDA
 template <class NodeDim, class ObstacleDim>
 __global__ void cudaCheckCollision(Space<NodeDim, ObstacleDim>* spacep,
                                    Obstacle* d_obstacles, Node* node);
+#endif

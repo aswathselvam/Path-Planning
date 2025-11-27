@@ -1,5 +1,5 @@
 /**
- * @file main.cu
+ * @file main.cpp
  * @author Aswath Muthuselvam (aswath@umd.edu)
  * @brief File for generating executable
  * @version 1.0
@@ -36,21 +36,14 @@
 */
 
 #include <iostream>
-#include <opencv2/core.hpp>
 #include <vector>
 #include "space.h"
-// #include <cuda_runtime.h> 
-
 #include <cmath>
 #include <thread>
-#include "gnuplot-iostream.h"
-#include <boost/tuple/tuple.hpp>
 #include <string>
 #include <string_view>
 #include <typeinfo>
 #include <chrono>
-
-
 
 using std::vector;
 using std::cout;
@@ -58,18 +51,28 @@ using std::endl;
 
 typedef Node NodeDim;
 typedef Obstacle ObstacleDim;
+
+#ifdef ENABLE_VISUALIZATION
+#include "gnuplot-iostream.h"
+#include <boost/tuple/tuple.hpp>
+#include <opencv2/core.hpp>
+
 typedef vector<boost::tuple<double, double, double, double>> connectionT;
 typedef vector<boost::tuple<double, double>> nodeT;
 typedef vector<boost::tuple<double, double, double>> obstacleT;
 #include "plot.h"
+#endif
 
 Space<NodeDim, ObstacleDim> space;
 
+#ifndef NO_CUDA
 __global__ void cudaCheckCollision(){
     int idx = blockIdx.x + threadIdx.x + blockDim.x;
 
 }
+#endif
 
+#ifdef ENABLE_VISUALIZATION
 void formGraph(connectionT& connectionVector,nodeT& nodeVector,Node& node){
     nodeVector.push_back(boost::make_tuple(node.x, node.y));
     if(!node.childNodes.size()>0){
@@ -91,7 +94,7 @@ void formPath(connectionT& connectionVector,Node& node){
     formPath(connectionVector,*node.parentNode);
 
 }
-
+#endif
 
 int main(){
 
@@ -100,6 +103,8 @@ int main(){
     space.init();
     
     bool found=false;
+
+#ifdef ENABLE_VISUALIZATION
     Plot plot(space.width, space.height);
     connectionT connectionVector;
     obstacleT obstacleVector;
@@ -113,35 +118,49 @@ int main(){
 
     startVector.push_back(boost::make_tuple(space.start.x, space.start.y));
     goalVector.push_back(boost::make_tuple(space.goal.x, space.goal.y));
+#endif
 
     int count = 0;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    cout << "Starting RRT Solver..." << endl;
+
     while (!found)
     {   
         found = space.solve();
 
+#ifdef ENABLE_VISUALIZATION
         // nodeVector.clear();
         // connectionVector.clear();
         // formGraph(connectionVector, nodeVector, currentNode);
         // plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector);
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        
+#endif
 
-        if(count%10==0){
-            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[µs]" << endl;
-            // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() << "[ns]" << std::endl;
-            // cout<<"Iteration: "<<count<<"\t\t: "<<std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<endl;
-            cout<<std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<endl;
-            std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        if(count%100==0){
+             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+             cout<<"Iteration: "<<count<<"\tTime: "<<std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms" <<endl;
         }
         count++;
+
+        if (count > 50000) {
+            cout << "Failed to find path after 50000 iterations." << endl;
+            break;
+        }
     }
     
+    if (found) {
+        cout << "Path found in " << count << " iterations." << endl;
+        if (space.goalnode) {
+             cout << "Goal reached at: " << space.goalnode->x << ", " << space.goalnode->y << endl;
+        }
+    }
+
+#ifdef ENABLE_VISUALIZATION
     connectionT pathVector;
-    formPath(pathVector, space.goalnode);
+    formPath(pathVector, *space.goalnode);
     plot.drawGraph(startVector, goalVector, nodeVector, connectionVector, obstacleVector, pathVector);
+#endif
     
     return 0;
-} 
+}

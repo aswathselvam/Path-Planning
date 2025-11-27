@@ -42,6 +42,7 @@
 #include <limits>
 #include <typeinfo>
 #include <variant>
+#include <random>
 
 using std::cout;
 using std::endl; 
@@ -52,12 +53,14 @@ Obstacle::Obstacle(){
     this->x=(5)*10;
     this->y=1*10;
     this->r=1*1;
+    this->intersected = false;
 }
 
 Obstacle::Obstacle(int i){
     this->x=(5-i)*10;
     this->y=i*10;
     this->r=i*1;
+    this->intersected = false;
 }
 
 Obstacle3D::Obstacle3D(int i){
@@ -65,6 +68,7 @@ Obstacle3D::Obstacle3D(int i){
     this->y=i*11;
     this->z=i*2;
     this->r=i*3;
+    this->intersected = false;
 }
 
 void Node::setup(double x, double y, double z){
@@ -79,8 +83,17 @@ void Node3D::setup(double x, double y, double z){
 }
 
 template <class NodeDim, class ObstacleDim>
-Space<NodeDim, ObstacleDim>::Space() : goalnode(goal){
+Space<NodeDim, ObstacleDim>::Space() {
 
+}
+
+template <class NodeDim, class ObstacleDim>
+Space<NodeDim, ObstacleDim>::~Space() {
+    if (h_obstacles) delete[] h_obstacles;
+    // d_obstacles should be freed with cudaFree if using CUDA
+    for(auto node : all_nodes) {
+        delete node;
+    }
 }
 
 template <class NodeDim, class ObstacleDim>
@@ -90,57 +103,59 @@ void Space<NodeDim, ObstacleDim>::init(){
     start.setup(10.0, 10.0, 10.0);
     goal.setup(width-10.2, 50.0, 50.0);
 
-    srand (1);
+    // srand (1);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis_width(0, width);
+    std::uniform_real_distribution<> dis_height(0, height);
+    std::uniform_real_distribution<> dis_radius(0, 8);
 
     N_OF_OBSTACLES=10; 
     h_obstacles = new ObstacleDim[N_OF_OBSTACLES];
     for(int i = 0; i<N_OF_OBSTACLES ;i++){
         ObstacleDim obstacle(i);
         obstacle.intersected = false;
-        obstacle.x=rand() % width;
-        obstacle.y=rand() % height;
-        obstacle.r=rand() % 8;
+        obstacle.x=dis_width(gen);
+        obstacle.y=dis_height(gen);
+        obstacle.r=dis_radius(gen);
         h_obstacles[i] = obstacle;
         this->obstacles.push_back(obstacle);
     }
 
+    // Stub out CUDA memory allocation
+    /*
     cudaMalloc(&d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim));
 	cudaMemcpy(d_obstacles, h_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyHostToDevice);
-    
+    */
 }
 
 template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::addNode(){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis_width(1.0, width + 1.0); // Keeping original range approx
+    std::uniform_real_distribution<> dis_height(1.0, height + 1.0);
 
-    NodeDim* node = new NodeDim{rand() % width + 1.0, rand() % height + 1.0};
+    // Iterative approach to avoid stack overflow and memory leak issues
+    while(true) {
+        NodeDim* node = new NodeDim{dis_width(gen), dis_height(gen)};
 
-    double inf=std::numeric_limits<double>::max();
-    NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
+        double inf=std::numeric_limits<double>::max();
+        NodeDim& nearestnode = getNearestNode(inf,this->start,*node);
 
-    directionComponent(nearestnode, *node);
+        directionComponent(nearestnode, *node);
 
-    bool collision = false;
-    bool CUDA=true;
-    if(CUDA){
-        cudaCheckCollision<<<1, N_OF_OBSTACLES>>>(this, d_obstacles, *node); 
-        // cudaMemcpy(h_obstacles, d_obstacles, N_OF_OBSTACLES*sizeof(ObstacleDim), cudaMemcpyDeviceToHost);
-        for(int i =0; i< N_OF_OBSTACLES; i++){
-            ObstacleDim d = d_obstacles[i];
-            if(d.intersected){
-                collision=true;
-                // cout<<"Collision detected at x: "<<d.x<<" y: "<<d.y<<endl;
-            }
+        bool collision = checkCollision(*node);
+
+        if(collision){
+            delete node;
+            continue; // Try again
         }
-    }else{
-        collision = checkCollision(*node);
+
+        addConnection(nearestnode, *node);
+        all_nodes.push_back(node);
+        return *node;
     }
-      
-    if(collision){
-        delete node;
-        return addNode();
-    }
-    addConnection(nearestnode, *node);
-    return *node;
 }
 
 template <class NodeDim, class ObstacleDim>
@@ -184,13 +199,15 @@ void Space<NodeDim, ObstacleDim>::directionComponent(Node3D& n1to, Node3D& n2){
 template <class NodeDim, class ObstacleDim>
 bool Space<NodeDim, ObstacleDim>::checkCollision(NodeDim& node){
     for(ObstacleDim& obstacle : this->obstacles){
-        if(L2(obstacle, node) < 2*obstacle.r){
-            return true;
+        if(L2(obstacle, node) < 2 + obstacle.r){ // Assuming node radius 2 as per kernel logic approximation or keeping safety margin
+             return true;
         }
     }
     return false;
 }
 
+// Stub out CUDA kernel
+/*
 template <class NodeDim, class ObstacleDim>
 __global__ void cudaCheckCollision(Space<NodeDim, ObstacleDim>* spacep, Obstacle* d_obstacles, Node node){
     int idx = blockIdx.x + threadIdx.x ;//+ blockDim.x;
@@ -201,6 +218,7 @@ __global__ void cudaCheckCollision(Space<NodeDim, ObstacleDim>* spacep, Obstacle
         d_obstacles[idx].intersected=true;
     }
 }
+*/
 
 template <class NodeDim, class ObstacleDim>
 void Space<NodeDim, ObstacleDim>::addConnection(NodeDim& a, NodeDim& b){
@@ -211,33 +229,98 @@ void Space<NodeDim, ObstacleDim>::addConnection(NodeDim& a, NodeDim& b){
 template <class NodeDim, class ObstacleDim>
 NodeDim& Space<NodeDim, ObstacleDim>::getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node){
     NodeDim* nearestnode = nullptr;
-    if(&currentNode == &start && currentNode.childNodes.size()<1){
-        return currentNode;
+
+    // Check distance to current node first
+    double dist = L2(currentNode, node);
+    if(dist < min_dist){
+        nearestnode = &currentNode;
+        min_dist = dist;
+    } else {
+        // Assume current node is nearest until proven otherwise, if we haven't found a better one yet
+        // However, standard RRT traversal requires checking everything.
+        // The original recursive implementation had flaws.
+        // Let's stick to recursive but be careful.
+        // If nearestnode is still null after checking children, we might return something invalid if we are not careful.
+        // But we initialized nearestnode with currentNode if it was closer than min_dist.
+        // If it wasn't closer, it means min_dist was already smaller (found by someone else?).
+        // No, min_dist is passed by reference.
     }
+
+    // If nearestnode is null here, it means currentNode is further than min_dist.
+    // But we still need to check children because they might be closer.
+    // If we return *nearestnode when it is null, we crash.
+
+    // Correct logic:
+    // 1. Update min_dist and best_node if current node is closer.
+    // 2. Recurse.
+
+    // But the original code was weird.
+
+    NodeDim* bestNodeInSubtree = (dist <= min_dist) ? &currentNode : nullptr; // Only update if <= because min_dist is current min.
+
     for(NodeDim* childNode: currentNode.childNodes){
-        float dist = L2(*childNode, node);
-        if(dist < min_dist){
-            nearestnode = childNode;
-            min_dist = dist;
+        NodeDim& childBest = getNearestNode(min_dist, *childNode, node);
+        // getNearestNode returns a reference to the best node found in that subtree (if any updated min_dist)
+        // Since it returns a reference, it MUST return a valid node.
+
+        // Let's look at the original code again.
+        /*
+        NodeDim* nearestnode = nullptr;
+        if(&currentNode == &start && currentNode.childNodes.size()<1){
+             return currentNode;
         }
-        NodeDim& nearestnodeCandidate = getNearestNode(min_dist, *childNode, node);
-        if(&nearestnodeCandidate!=nullptr){
-                nearestnode = &nearestnodeCandidate;
+        for(NodeDim* childNode: currentNode.childNodes){
+             float dist = L2(*childNode, node);
+             if(dist < min_dist){
+                 nearestnode = childNode;
+                 min_dist = dist;
+             }
+             NodeDim& nearestnodeCandidate = getNearestNode(min_dist, *childNode, node);
+             if(&nearestnodeCandidate!=nullptr){ // Reference is never null
+                 nearestnode = &nearestnodeCandidate;
+             }
+        }
+        return *nearestnode; // If nearestnode is null (no child was closer, and not start), this crashes.
+        */
+
+        // I will change the signature or logic.
+        // Easier: Just traverse and update a pointer passed by reference.
+        // But I need to match the signature in header?
+        // Header: NodeDim& getNearestNode(double& min_dist, NodeDim& currentNode, NodeDim& node);
+
+        // I can just rely on min_dist.
+        // If childBest is closer (which we know by checking if its distance to node is min_dist), update.
+        // But L2 calculation is needed.
+
+        if (L2(childBest, node) <= min_dist) {
+            bestNodeInSubtree = &childBest;
         }
     }
 
-    return *nearestnode;
+    // If bestNodeInSubtree is null, it means neither this node nor its children improved min_dist.
+    // In that case, we should probably return currentNode just to return a reference, but the caller should check min_dist.
+    // OR we return the node that corresponds to min_dist.
+
+    // Wait, the caller initializes min_dist to infinity. So the first call (start node) will definitely set min_dist and bestNodeInSubtree.
+
+    if (bestNodeInSubtree == nullptr) {
+        // This should only happen if we are deep in recursion and no improvement found.
+        // We must return something.
+        return currentNode;
+    }
+
+    return *bestNodeInSubtree;
 }
 
 template <class NodeDim, class ObstacleDim>
 bool Space<NodeDim, ObstacleDim>::solve(){
-    NodeDim* node = &addNode();
+    NodeDim& node = addNode();
 
-    if(node!=nullptr){
-        if(L2(goal,*node) < 5){
-            goalnode = *node;
+    // if(node!=nullptr){ // node is reference
+        if(L2(goal, node) < 5){
+            goalnode = &node;
             return true;
         }
-    }
+    // }
     return false;
 }
